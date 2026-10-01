@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LifeLink - Smart Blood Donor & Emergency Assistance</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f6f8;
+            color: #1f2937;
+        }
+
+        /* NAVBAR */
+        nav {
+            height: 68px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #b91c1c;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #374151;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .nav-links a:hover {
+            color: #dc2626;
+        }
+
+        .login-btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            background: #fee2e2;
+            color: #b91c1c !important;
+        }
+
+        .login-btn:hover {
+            background: #fecaca;
+        }
+
+        .donor-btn {
+            background: #dc2626;
+            color: white !important;
+            padding: 12px 20px;
+            border-radius: 8px;
+        }
+
+        .donor-btn:hover {
+            background: #991b1b;
+        }
+
+        /* HERO */
+        .hero {
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 60px 20px 100px;
+        }
+
+        .hero-logo {
+            font-size: 70px;
+            margin-bottom: 10px;
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            margin-bottom: 22px;
+        }
+
+        .hero h2 {
+            font-size: 22px;
+            font-weight: normal;
+            margin-bottom: 38px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 850px;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .hero-btn {
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 9px;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .request-btn {
+            background: white;
+            color: #dc2626;
+        }
+
+        .request-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .hero-donor-btn {
+            border: 2px solid white;
+            color: white;
+        }
+
+        .hero-donor-btn:hover {
+            background: white;
+            color: #dc2626;
+        }
+
+        /* FEATURES */
+        .features {
+            max-width: 1100px;
+            margin: -55px auto 60px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .feature-card {
+            background: white;
+            min-height: 130px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.10);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        .feature-card h3 {
+            color: #6b7280;
+            font-size: 17px;
+            font-weight: normal;
+        }
+
+        /* INFO SECTION */
+        .info-section {
+            max-width: 1000px;
+            margin: 20px auto 70px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .info-section h2 {
+            color: #991b1b;
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+
+        .info-section p {
+            color: #6b7280;
+            line-height: 1.7;
+            font-size: 17px;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #111827;
+            color: white;
+            text-align: center;
+            padding: 25px;
+        }
+
+        footer p {
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        /* MOBILE */
+        @media (max-width: 800px) {
+
+            nav {
+                height: auto;
+                padding: 18px 20px;
+                flex-direction: column;
+                gap: 18px;
+            }
+
+            .nav-links {
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-links a {
+                font-size: 14px;
+            }
+
+            .hero h1 {
+                font-size: 40px;
+            }
+
+            .hero h2 {
+                font-size: 18px;
+            }
+
+            .hero p {
+                font-size: 17px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                margin-top: -30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+
+        <div class="logo">
+            <span class="logo-icon">💧</span>
+            <span>LifeLink</span>
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/find-blood">
+                Find Blood
+            </a>
+
+            <a href="/request-blood">
+                Emergency Request
+            </a>
+
+            <!-- NEW LOGIN BUTTON -->
+            <a href="/login" class="login-btn">
+                Login
+            </a>
+
+            <a href="/register" class="donor-btn">
+                Become a Donor
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+
+        <div class="hero-logo">
+            💧
+        </div>
+
+        <h1>
+            LifeLink
+        </h1>
+
+        <h2>
+            Smart Blood Donor & Emergency Assistance System
+        </h2>
+
+        <p>
+            Connecting patients and hospitals with registered
+            blood donors during emergencies.
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="/request-blood"
+               class="hero-btn request-btn">
+                🩸 Request Blood
+            </a>
+
+            <a href="/register"
+               class="hero-btn hero-donor-btn">
+                💗 Become a Donor
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- FEATURES -->
+    <section class="features">
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                💧
+            </div>
+
+            <h3>
+                Blood Donors
+            </h3>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🏥
+            </div>
+
+            <h3>
+                Hospitals
+            </h3>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🚨
+            </div>
+
+            <h3>
+                Emergency Support
+            </h3>
+
+        </div>
+
+    </section>
+
+
+    <!-- INFORMATION -->
+    <section class="info-section">
+
+        <h2>
+            How LifeLink Helps
+        </h2>
+
+        <p>
+            LifeLink helps connect people who need blood during
+            emergencies with registered and available blood donors.
+            Blood requests can be submitted with the required blood
+            group, units, hospital and city information.
+        </p>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+        <p>
+            © 2026 LifeLink - Smart Blood Donor & Emergency Assistance System
+        </p>
+
+    </footer>
+
+</body>
+</html>

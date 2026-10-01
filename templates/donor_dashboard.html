@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Donor Dashboard | LifeLink</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        .navbar {
+            background: #8b0000;
+            color: white;
+            padding: 18px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #ffd6d6;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .nav-right a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .logout {
+            background: white;
+            color: #8b0000 !important;
+            padding: 9px 16px;
+            border-radius: 8px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 35px auto;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #687386;
+        }
+
+        .notification-banner {
+            background: white;
+            border-left: 6px solid #8b0000;
+            border-radius: 14px;
+            padding: 20px 22px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .notification-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #ffe5e5;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 25px;
+        }
+
+        .notification-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .notification-text {
+            color: #687386;
+            font-size: 14px;
+        }
+
+        .notification-count {
+            min-width: 38px;
+            height: 38px;
+            padding: 0 10px;
+            border-radius: 20px;
+
+            background: #8b0000;
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .critical-alert {
+            background: #fff0f0;
+            border: 1px solid #ffb3b3;
+            color: #b71c1c;
+
+            padding: 15px 18px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+
+            font-weight: bold;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+
+            margin-bottom: 25px;
+        }
+
+        .profile-title {
+            font-size: 21px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .info-box {
+            background: #f8f9fc;
+            padding: 18px;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .availability {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .available-box {
+            background: #e9f9ef;
+            border: 1px solid #9ad9ad;
+        }
+
+        .unavailable-box {
+            background: #fff0f0;
+            border: 1px solid #f0aaaa;
+        }
+
+        .availability-text h3 {
+            margin-bottom: 5px;
+        }
+
+        .availability-text p {
+            color: #666;
+        }
+
+        .toggle-btn {
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+
+            font-size: 15px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .make-unavailable {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .make-available {
+            background: #198754;
+            color: white;
+        }
+
+        .requests-section {
+            margin-top: 30px;
+        }
+
+        .requests-section h2 {
+            margin-bottom: 18px;
+        }
+
+        .request-card {
+            background: white;
+            border-radius: 15px;
+            padding: 24px;
+            margin-bottom: 18px;
+
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+
+            border-left: 5px solid #8b0000;
+        }
+
+        .new-request {
+            border-left: 5px solid #e53935;
+            box-shadow: 0 5px 25px rgba(139,0,0,0.12);
+        }
+
+        .request-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 18px;
+        }
+
+        .request-id {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .new-badge {
+            background: #8b0000;
+            color: white;
+
+            padding: 6px 11px;
+            border-radius: 15px;
+
+            font-size: 11px;
+            font-weight: bold;
+
+            margin-left: 8px;
+        }
+
+        .urgency {
+            padding: 7px 13px;
+            border-radius: 20px;
+
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .critical {
+            background: #ffe0e0;
+            color: #c62828;
+        }
+
+        .urgent {
+            background: #fff0d6;
+            color: #c56a00;
+        }
+
+        .normal {
+            background: #e8f2ff;
+            color: #1769aa;
+        }
+
+        .request-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+
+            margin-bottom: 20px;
+        }
+
+        .request-info div {
+            background: #f7f8fb;
+            padding: 13px;
+            border-radius: 8px;
+        }
+
+        .request-info small {
+            display: block;
+            color: #777;
+            margin-bottom: 5px;
+        }
+
+        .request-info strong {
+            font-size: 15px;
+        }
+
+        .response-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            border-top: 1px solid #eee;
+
+            padding-top: 18px;
+        }
+
+        .response-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .accept-btn,
+        .decline-btn {
+            border: none;
+
+            padding: 11px 20px;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .accept-btn {
+            background: #198754;
+            color: white;
+        }
+
+        .decline-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .pending {
+            color: #c56a00;
+            font-weight: bold;
+        }
+
+        .accepted {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .declined {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .empty {
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 15px;
+
+            text-align: center;
+
+            color: #777;
+
+            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        }
+
+        @media(max-width: 750px) {
+
+            .navbar {
+                padding: 15px 5%;
+            }
+
+            .nav-right a:not(.logout) {
+                display: none;
+            }
+
+            .container {
+                width: 92%;
+            }
+
+            .profile-grid,
+            .request-info {
+                grid-template-columns: 1fr;
+            }
+
+            .availability {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .notification-banner {
+                align-items: flex-start;
+            }
+
+            .request-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .response-area {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .welcome h1 {
+                font-size: 26px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+    <div class="logo">
+        🩸 Life<span>Link</span>
+    </div>
+
+    <div class="nav-right">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/find-blood">
+            Find Blood
+        </a>
+
+        <a href="/my-requests">
+            My Requests
+        </a>
+
+        <a href="/logout" class="logout">
+            Logout
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="container">
+
+    <div class="welcome">
+
+        <h1>
+            Welcome, {{ donor.name }} 👋
+        </h1>
+
+        <p>
+            Manage your donor availability and emergency blood requests.
+        </p>
+
+    </div>
+
+
+    {% if notification_count|default(0) > 0 %}
+
+    <div class="notification-banner">
+
+        <div class="notification-left">
+
+            <div class="notification-icon">
+                🔔
+            </div>
+
+            <div>
+
+                <div class="notification-title">
+                    New Emergency Request{{ "s" if notification_count != 1 else "" }}
+                </div>
+
+                <div class="notification-text">
+
+                    You have
+                    {{ notification_count }}
+                    pending blood donation request{{ "s" if notification_count != 1 else "" }}.
+
+                    Please review and respond.
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="notification-count">
+            {{ notification_count }}
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+    {% if critical_count|default(0) > 0 %}
+
+    <div class="critical-alert">
+
+        🚨
+        {{ critical_count }}
+        critical emergency request{{ "s" if critical_count != 1 else "" }}
+        require{{ "" if critical_count == 1 else "s" }}
+        your attention.
+
+    </div>
+
+    {% endif %}
+
+
+    <div class="profile-card">
+
+        <div class="profile-title">
+            Donor Profile
+        </div>
+
+        <div class="profile-grid">
+
+            <div class="info-box">
+
+                <div class="info-label">
+                    Name
+                </div>
+
+                <div class="info-value">
+                    {{ donor.name }}
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-label">
+                    Blood Group
+                </div>
+
+                <div class="info-value">
+                    🩸 {{ donor.blood_group }}
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-label">
+                    City
+                </div>
+
+                <div class="info-value">
+                    {{ donor.city }}
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-label">
+                    Email
+                </div>
+
+                <div class="info-value">
+                    {{ donor.email }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {% if donor.is_available %}
+
+        <div class="availability available-box">
+
+            <div class="availability-text">
+
+                <h3>
+                    🟢 You are Available
+                </h3>
+
+                <p>
+                    You can receive new emergency blood requests.
+                </p>
+
+            </div>
+
+            <form
+                action="{{ url_for('toggle_availability') }}"
+                method="POST">
+
+                <button
+                    type="submit"
+                    class="toggle-btn make-unavailable">
+
+                    🔴 Set Not Available
+
+                </button>
+
+            </form>
+
+        </div>
+
+        {% else %}
+
+        <div class="availability unavailable-box">
+
+            <div class="availability-text">
+
+                <h3>
+                    🔴 You are Not Available
+                </h3>
+
+                <p>
+                    You will not receive new donor matching requests.
+                </p>
+
+            </div>
+
+            <form
+                action="{{ url_for('toggle_availability') }}"
+                method="POST">
+
+                <button
+                    type="submit"
+                    class="toggle-btn make-available">
+
+                    🟢 Set Available
+
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="requests-section">
+
+        <h2>
+            🔔 Emergency Blood Requests
+        </h2>
+
+
+        {% if requests %}
+
+            {% for req in requests %}
+
+            <div class="request-card
+                {% if req.response == 'pending' %}
+                    new-request
+                {% endif %}">
+
+                <div class="request-top">
+
+                    <div class="request-id">
+
+                        Request #{{ req.id }}
+
+                        {% if req.response == "pending" %}
+
+                        <span class="new-badge">
+                            🔔 NEW
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    {% if req.urgency == "critical" %}
+
+                    <div class="urgency critical">
+                        🔴 CRITICAL
+                    </div>
+
+                    {% elif req.urgency == "urgent" %}
+
+                    <div class="urgency urgent">
+                        🟠 URGENT
+                    </div>
+
+                    {% else %}
+
+                    <div class="urgency normal">
+                        🔵 NORMAL
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="request-info">
+
+                    <div>
+                        <small>Patient</small>
+                        <strong>{{ req.patient_name }}</strong>
+                    </div>
+
+                    <div>
+                        <small>Blood Group</small>
+                        <strong>🩸 {{ req.blood_group }}</strong>
+                    </div>
+
+                    <div>
+                        <small>Units Required</small>
+                        <strong>{{ req.units_required }}</strong>
+                    </div>
+
+                    <div>
+                        <small>Location</small>
+                        <strong>📍 {{ req.city }}</strong>
+                    </div>
+
+                    <div>
+                        <small>Contact</small>
+                        <strong>{{ req.contact_phone }}</strong>
+                    </div>
+
+                    <div>
+                        <small>Request Status</small>
+                        <strong>{{ req.status }}</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="response-area">
+
+                    <div>
+
+                        {% if req.response == "accepted" %}
+
+                        <span class="accepted">
+                            ✅ You Accepted This Request
+                        </span>
+
+                        {% elif req.response == "declined" %}
+
+                        <span class="declined">
+                            ❌ You Declined This Request
+                        </span>
+
+                        {% else %}
+
+                        <span class="pending">
+                            🚨 Emergency Request — Response Required
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    {% if req.response == "pending" %}
+
+                    <div class="response-buttons">
+
+                        <form
+                            action="{{ url_for('respond_request', response_id=req.response_id, action='accepted') }}"
+                            method="POST">
+
+                            <button
+                                type="submit"
+                                class="accept-btn">
+
+                                ✅ Accept
+
+                            </button>
+
+                        </form>
+
+
+                        <form
+                            action="{{ url_for('respond_request', response_id=req.response_id, action='declined') }}"
+                            method="POST">
+
+                            <button
+                                type="submit"
+                                class="decline-btn">
+
+                                ❌ Decline
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+        <div class="empty">
+
+            <h3>
+                No Emergency Requests
+            </h3>
+
+            <br>
+
+            <p>
+                When a matching blood request is created,
+                it will appear here as a notification.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

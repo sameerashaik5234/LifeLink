@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Request Blood - LifeLink</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        .navbar {
+            background: #8b0000;
+            color: white;
+            padding: 18px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #8b0000;
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin-top: 17px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d5d9e2;
+            border-radius: 9px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            border: none;
+            border-radius: 9px;
+            background: #8b0000;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #650000;
+        }
+
+        .note {
+            background: #fff5f5;
+            border-left: 4px solid #8b0000;
+            padding: 13px;
+            margin-top: 15px;
+            color: #555;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+    <div class="logo">
+        🩸 LifeLink
+    </div>
+
+    <div>
+        Emergency Blood Request
+    </div>
+
+</div>
+
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>
+            🩸 Request Blood
+        </h1>
+
+        <div class="note">
+            LifeLink will search for available matching donors
+            based on blood group and city.
+        </div>
+
+
+        <form method="POST">
+
+            <label>
+                Patient Name
+            </label>
+
+            <input
+                type="text"
+                name="patient_name"
+                placeholder="Enter patient name"
+                required
+            >
+
+
+            <label>
+                Blood Group
+            </label>
+
+            <select name="blood_group" required>
+
+                <option value="">
+                    Select Blood Group
+                </option>
+
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+
+            </select>
+
+
+            <label>
+                Units Required
+            </label>
+
+            <input
+                type="number"
+                name="units_required"
+                min="1"
+                max="10"
+                value="1"
+                required
+            >
+
+
+            <label>
+                Hospital
+            </label>
+
+            <select name="hospital_id" required>
+
+                <option value="">
+                    Select Hospital
+                </option>
+
+                {% for hospital in hospitals %}
+
+                    <option value="{{ hospital.id }}">
+
+                        {{ hospital.name }}
+                        -
+                        {{ hospital.city }}
+
+                        {% if hospital.is_verified %}
+                            ✓ Verified
+                        {% endif %}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <label>
+                City
+            </label>
+
+            <select name="city" required>
+
+                <option value="Pulivendula">
+                    Pulivendula
+                </option>
+
+                <option value="Kadapa">
+                    Kadapa
+                </option>
+
+                <option value="Hyderabad">
+                    Hyderabad
+                </option>
+
+                <option value="Bengaluru">
+                    Bengaluru
+                </option>
+
+                <option value="Vijayawada">
+                    Vijayawada
+                </option>
+
+                <option value="Tirupati">
+                    Tirupati
+                </option>
+
+                <option value="Other">
+                    Other
+                </option>
+
+            </select>
+
+
+            <label>
+                Urgency
+            </label>
+
+            <select name="urgency" required>
+
+                <option value="normal">
+                    Normal
+                </option>
+
+                <option value="urgent" selected>
+                    Urgent
+                </option>
+
+                <option value="critical">
+                    Critical Emergency
+                </option>
+
+            </select>
+
+
+            <label>
+                Contact Phone
+            </label>
+
+            <input
+                type="tel"
+                name="contact_phone"
+                placeholder="Enter contact number"
+                required
+            >
+
+
+            <button type="submit">
+                🚨 Submit Blood Request
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

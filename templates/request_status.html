@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Request Status - LifeLink</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        .navbar {
+            background: #8b0000;
+            color: white;
+            padding: 18px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #8b0000;
+            margin-top: 0;
+        }
+
+        .success {
+            background: #e5f8ea;
+            color: #176b31;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            line-height: 2;
+            color: #444;
+        }
+
+        .blood {
+            font-size: 32px;
+            font-weight: bold;
+            color: #8b0000;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stat {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat h2 {
+            margin: 0;
+            color: #8b0000;
+        }
+
+        .stat p {
+            margin-bottom: 0;
+            color: #666;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 18px;
+            background: #8b0000;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            background: #650000;
+        }
+
+        @media (max-width: 700px) {
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+    <div class="logo">
+        🩸 LifeLink
+    </div>
+
+    <div>
+        Blood Request Status
+    </div>
+
+</div>
+
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>
+            🩸 Blood Request Submitted
+        </h1>
+
+        <div class="success">
+
+            Your blood request has been successfully created.
+
+            {% if total > 0 %}
+                Matching donors have been notified.
+            {% else %}
+                No matching available donors were found at this time.
+            {% endif %}
+
+        </div>
+
+
+        {% if blood_request %}
+
+            <div class="info">
+
+                <div class="blood">
+                    {{ blood_request.blood_group }}
+                </div>
+
+                <strong>Patient:</strong>
+                {{ blood_request.patient_name }}
+
+                <br>
+
+                <strong>Units Required:</strong>
+                {{ blood_request.units_required }}
+
+                <br>
+
+                <strong>Hospital:</strong>
+                {{ blood_request.hospital_name or "Not specified" }}
+
+                <br>
+
+                <strong>City:</strong>
+                {{ blood_request.city }}
+
+                <br>
+
+                <strong>Urgency:</strong>
+                {{ blood_request.urgency|upper }}
+
+                <br>
+
+                <strong>Contact:</strong>
+                {{ blood_request.contact_phone }}
+
+                <br>
+
+                <strong>Status:</strong>
+                {{ blood_request.status|upper }}
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="stats">
+
+            <div class="stat">
+                <h2>{{ total }}</h2>
+                <p>Donors Notified</p>
+            </div>
+
+            <div class="stat">
+                <h2>{{ accepted }}</h2>
+                <p>Accepted</p>
+            </div>
+
+            <div class="stat">
+                <h2>{{ pending }}</h2>
+                <p>Pending</p>
+            </div>
+
+            <div class="stat">
+                <h2>{{ declined }}</h2>
+                <p>Declined</p>
+            </div>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('my_requests') }}"
+            class="button"
+        >
+            View My Requests
+        </a>
+
+        <a
+            href="{{ url_for('home') }}"
+            class="button"
+        >
+            Home
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
