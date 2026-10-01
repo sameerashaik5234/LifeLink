@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -21,12 +21,12 @@
 
         /* NAVBAR */
         nav {
-            height: 68px;
+            min-height: 68px;
             background: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 6%;
+            padding: 12px 6%;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
@@ -46,29 +46,68 @@
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 28px;
+            gap: 24px;
         }
 
-        .nav-links a {
+        .nav-links > a {
             text-decoration: none;
             color: #374151;
             font-size: 16px;
             font-weight: bold;
         }
 
-        .nav-links a:hover {
+        .nav-links > a:hover {
             color: #dc2626;
         }
 
+        /* LOGIN DROPDOWN */
+        .login-menu {
+            position: relative;
+        }
+
         .login-btn {
+            display: inline-block;
             padding: 10px 18px;
             border-radius: 8px;
             background: #fee2e2;
             color: #b91c1c !important;
+            cursor: pointer;
         }
 
         .login-btn:hover {
             background: #fecaca;
+        }
+
+        .login-dropdown {
+            display: none;
+            position: absolute;
+            top: 48px;
+            right: 0;
+            width: 230px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 10px;
+            z-index: 1000;
+        }
+
+        .login-menu:hover .login-dropdown {
+            display: block;
+        }
+
+        .login-dropdown a {
+            display: block;
+            text-decoration: none;
+            color: #374151;
+            padding: 13px 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .login-dropdown a:hover {
+            background: #fee2e2;
+            color: #b91c1c;
         }
 
         .donor-btn {
@@ -79,7 +118,8 @@
         }
 
         .donor-btn:hover {
-            background: #991b1b;
+            background: #991b1b !important;
+            color: white !important;
         }
 
         /* HERO */
@@ -186,7 +226,7 @@
             font-weight: normal;
         }
 
-        /* INFO SECTION */
+        /* INFORMATION */
         .info-section {
             max-width: 1000px;
             margin: 20px auto 70px;
@@ -235,8 +275,12 @@
                 justify-content: center;
             }
 
-            .nav-links a {
+            .nav-links > a {
                 font-size: 14px;
+            }
+
+            .login-dropdown {
+                right: -60px;
             }
 
             .hero h1 {
@@ -265,7 +309,7 @@
     <nav>
 
         <div class="logo">
-            <span class="logo-icon">💧</span>
+            <span class="logo-icon">🩸</span>
             <span>LifeLink</span>
         </div>
 
@@ -283,10 +327,30 @@
                 Emergency Request
             </a>
 
-            <!-- NEW LOGIN BUTTON -->
-            <a href="/login" class="login-btn">
-                Login
-            </a>
+            <!-- LOGIN MENU -->
+            <div class="login-menu">
+
+                <a href="#" class="login-btn">
+                    🔐 Login ▾
+                </a>
+
+                <div class="login-dropdown">
+
+                    <a href="/login">
+                        👤 Patient / Donor Login
+                    </a>
+
+                    <a href="/hospital-login">
+                        🏥 Hospital Login
+                    </a>
+
+                    <a href="/admin-login">
+                        👨‍💼 Admin Login
+                    </a>
+
+                </div>
+
+            </div>
 
             <a href="/register" class="donor-btn">
                 Become a Donor
@@ -301,7 +365,7 @@
     <section class="hero">
 
         <div class="hero-logo">
-            💧
+            🩸
         </div>
 
         <h1>
@@ -340,7 +404,7 @@
         <div class="feature-card">
 
             <div class="feature-icon">
-                💧
+                🩸
             </div>
 
             <h3>
