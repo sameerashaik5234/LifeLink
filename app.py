@@ -1,24 +1,51 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    flash
+)
+
 import mysql.connector
-from werkzeug.security import generate_password_hash, check_password_hash
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
+
 from functools import wraps
+
+
+# =========================================================
+# ENVIRONMENT
+# =========================================================
 
 load_dotenv()
 
+
 app = Flask(__name__)
-app.secret_key = os.getenv("LIFELINK_SECRET_KEY")
+
+app.secret_key = os.getenv(
+    "LIFELINK_SECRET_KEY"
+)
 
 
 # =========================================================
-# DATABASE CONNECTION
+# DATABASE
 # =========================================================
 
-DB_PASSWORD = os.getenv("LIFELINK_DB_PASSWORD")
+DB_PASSWORD = os.getenv(
+    "LIFELINK_DB_PASSWORD"
+)
 
 
 def get_db_connection():
+
     return mysql.connector.connect(
         host="localhost",
         user="root",
@@ -32,12 +59,20 @@ def get_db_connection():
 # =========================================================
 
 def login_required(f):
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
         if "user_id" not in session:
-            flash("Please login first.", "error")
-            return redirect(url_for("login"))
+
+            flash(
+                "Please login first.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
 
         return f(*args, **kwargs)
 
@@ -45,16 +80,31 @@ def login_required(f):
 
 
 def donor_required(f):
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
         if "user_id" not in session:
-            flash("Please login first.", "error")
-            return redirect(url_for("login"))
+
+            flash(
+                "Please login first.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
 
         if session.get("role") != "donor":
-            flash("Donor access required.", "error")
-            return redirect(url_for("login"))
+
+            flash(
+                "Donor access required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
 
         return f(*args, **kwargs)
 
@@ -62,12 +112,20 @@ def donor_required(f):
 
 
 def hospital_required(f):
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
         if "hospital_id" not in session:
-            flash("Please login as hospital.", "error")
-            return redirect(url_for("hospital_login"))
+
+            flash(
+                "Please login as hospital.",
+                "error"
+            )
+
+            return redirect(
+                url_for("hospital_login")
+            )
 
         return f(*args, **kwargs)
 
@@ -75,12 +133,23 @@ def hospital_required(f):
 
 
 def admin_required(f):
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
-        if "user_id" not in session or session.get("role") != "admin":
-            flash("Admin access required.", "error")
-            return redirect(url_for("admin_login"))
+        if (
+            "user_id" not in session
+            or session.get("role") != "admin"
+        ):
+
+            flash(
+                "Admin access required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_login")
+            )
 
         return f(*args, **kwargs)
 
@@ -93,24 +162,53 @@ def admin_required(f):
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+
+    return render_template(
+        "index.html"
+    )
 
 
 # =========================================================
-# USER REGISTRATION - DONOR
+# DONOR REGISTRATION
 # =========================================================
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route(
+    "/register",
+    methods=["GET", "POST"]
+)
 def register():
 
     if request.method == "POST":
 
-        name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip()
-        phone = request.form.get("phone", "").strip()
-        password = request.form.get("password", "")
-        blood_group = request.form.get("blood_group", "").strip()
-        city = request.form.get("city", "").strip()
+        name = request.form.get(
+            "name",
+            ""
+        ).strip()
+
+        email = request.form.get(
+            "email",
+            ""
+        ).strip()
+
+        phone = request.form.get(
+            "phone",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        blood_group = request.form.get(
+            "blood_group",
+            ""
+        ).strip()
+
+        city = request.form.get(
+            "city",
+            ""
+        ).strip()
 
         if not all([
             name,
@@ -120,8 +218,15 @@ def register():
             blood_group,
             city
         ]):
-            flash("Please fill all fields.", "error")
-            return redirect(url_for("register"))
+
+            flash(
+                "Please fill all fields.",
+                "error"
+            )
+
+            return redirect(
+                url_for("register")
+            )
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -129,19 +234,33 @@ def register():
         try:
 
             cursor.execute(
-                "SELECT id FROM users WHERE email = %s",
+                """
+                SELECT id
+                FROM users
+                WHERE email = %s
+                """,
                 (email,)
             )
 
             existing = cursor.fetchone()
 
             if existing:
-                flash("Email already registered.", "error")
-                return redirect(url_for("register"))
 
-            hashed_password = generate_password_hash(password)
+                flash(
+                    "Email already registered.",
+                    "error"
+                )
 
-            cursor.execute("""
+                return redirect(
+                    url_for("register")
+                )
+
+            hashed_password = generate_password_hash(
+                password
+            )
+
+            cursor.execute(
+                """
                 INSERT INTO users
                 (
                     name,
@@ -164,14 +283,16 @@ def register():
                     %s,
                     TRUE
                 )
-            """, (
-                name,
-                email,
-                phone,
-                hashed_password,
-                blood_group,
-                city
-            ))
+                """,
+                (
+                    name,
+                    email,
+                    phone,
+                    hashed_password,
+                    blood_group,
+                    city
+                )
+            )
 
             conn.commit()
 
@@ -180,38 +301,107 @@ def register():
                 "success"
             )
 
-            return redirect(url_for("login"))
+            return redirect(
+                url_for("login")
+            )
 
         finally:
+
             cursor.close()
             conn.close()
 
-    return render_template("register.html")
+    return render_template(
+        "register.html"
+    )
 
 
 # =========================================================
 # PATIENT REGISTRATION
 # =========================================================
 
-@app.route("/patient-register", methods=["GET", "POST"])
+@app.route(
+    "/patient-register",
+    methods=["GET", "POST"]
+)
 def patient_register():
 
     if request.method == "POST":
 
-        name = request.form["name"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        password = request.form["password"]
-        city = request.form["city"]
+        name = request.form.get(
+            "name",
+            ""
+        ).strip()
 
-        hashed_password = generate_password_hash(password)
+        email = request.form.get(
+            "email",
+            ""
+        ).strip()
 
-        db = get_db_connection()
-        cursor = db.cursor()
+        phone = request.form.get(
+            "phone",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        city = request.form.get(
+            "city",
+            ""
+        ).strip()
+
+        if not all([
+            name,
+            email,
+            phone,
+            password,
+            city
+        ]):
+
+            flash(
+                "Please fill all fields.",
+                "error"
+            )
+
+            return redirect(
+                url_for("patient_register")
+            )
+
+        hashed_password = generate_password_hash(
+            password
+        )
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
         try:
 
-            cursor.execute("""
+            cursor.execute(
+                """
+                SELECT id
+                FROM users
+                WHERE email = %s
+                """,
+                (email,)
+            )
+
+            existing = cursor.fetchone()
+
+            if existing:
+
+                flash(
+                    "Email already registered.",
+                    "error"
+                )
+
+                return redirect(
+                    url_for("patient_register")
+                )
+
+            cursor.execute(
+                """
                 INSERT INTO users
                 (
                     name,
@@ -232,93 +422,143 @@ def patient_register():
                     %s,
                     FALSE
                 )
-            """, (
-                name,
-                email,
-                phone,
-                hashed_password,
-                city
-            ))
+                """,
+                (
+                    name,
+                    email,
+                    phone,
+                    hashed_password,
+                    city
+                )
+            )
 
-            db.commit()
+            conn.commit()
 
             flash(
                 "Patient registration successful. Please login.",
                 "success"
             )
 
-            return redirect(url_for("login"))
+            return redirect(
+                url_for("login")
+            )
 
         except mysql.connector.Error as e:
 
-            db.rollback()
+            conn.rollback()
 
-            print("Patient Registration Error:", e)
+            print(
+                "Patient Registration Error:",
+                e
+            )
 
             flash(
-                "Email may already exist.",
-                "danger"
+                "Patient registration failed.",
+                "error"
             )
 
         finally:
 
             cursor.close()
-            db.close()
+            conn.close()
 
-    return render_template("patient_register.html")
+    return render_template(
+        "patient_register.html"
+    )
 
 
 # =========================================================
 # USER LOGIN
 # =========================================================
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
 def login():
 
     if request.method == "POST":
 
-        email = request.form.get("email", "").strip()
-        password = request.form.get("password", "")
+        email = request.form.get(
+            "email",
+            ""
+        ).strip()
 
-        db = get_db_connection()
-        cursor = db.cursor(dictionary=True)
-
-        cursor.execute(
-            "SELECT * FROM users WHERE email = %s",
-            (email,)
+        password = request.form.get(
+            "password",
+            ""
         )
 
-        user = cursor.fetchone()
+        conn = get_db_connection()
+        cursor = conn.cursor(
+            dictionary=True
+        )
 
-        cursor.close()
-        db.close()
+        try:
 
-        if user and check_password_hash(
-            user["password"],
-            password
-        ):
+            cursor.execute(
+                """
+                SELECT *
+                FROM users
+                WHERE email = %s
+                """,
+                (email,)
+            )
 
-            session["user_id"] = user["id"]
-            session["user_name"] = user["name"]
-            session["role"] = user["role"]
+            user = cursor.fetchone()
 
-            if user["role"] == "donor":
-                return redirect(url_for("donor_dashboard"))
+        finally:
 
-            if user["role"] == "patient":
-                return redirect(url_for("home"))
+            cursor.close()
+            conn.close()
 
-            if user["role"] == "admin":
-                return redirect(url_for("admin_dashboard"))
+        if user:
 
-            return redirect(url_for("home"))
+            try:
+
+                password_valid = check_password_hash(
+                    user["password"],
+                    password
+                )
+
+            except Exception:
+
+                password_valid = False
+
+            if password_valid:
+
+                session["user_id"] = user["id"]
+                session["user_name"] = user["name"]
+                session["name"] = user["name"]
+                session["email"] = user["email"]
+                session["role"] = user["role"]
+
+                if user["role"] == "donor":
+
+                    return redirect(
+                        url_for("donor_dashboard")
+                    )
+
+                if user["role"] == "patient":
+
+                    return redirect(
+                        url_for("home")
+                    )
+
+                if user["role"] == "admin":
+
+                    return redirect(
+                        url_for("admin_dashboard")
+                    )
 
         flash(
             "Invalid email or password.",
-            "danger"
+            "error"
         )
 
-    return render_template("login.html")
+    return render_template(
+        "login.html"
+    )
 
 
 # =========================================================
@@ -332,11 +572,14 @@ def donor_dashboard():
     donor_id = session["user_id"]
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 id,
                 name,
@@ -347,7 +590,9 @@ def donor_dashboard():
                 is_available
             FROM users
             WHERE id = %s
-        """, (donor_id,))
+            """,
+            (donor_id,)
+        )
 
         donor = cursor.fetchone()
 
@@ -360,9 +605,12 @@ def donor_dashboard():
                 "error"
             )
 
-            return redirect(url_for("login"))
+            return redirect(
+                url_for("login")
+            )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 br.id,
                 br.blood_group,
@@ -375,7 +623,8 @@ def donor_dashboard():
                 br.created_at,
 
                 dr.id AS response_id,
-                dr.response
+                dr.response,
+                dr.responded_at
 
             FROM donor_responses dr
 
@@ -386,39 +635,57 @@ def donor_dashboard():
 
             ORDER BY
                 CASE
-                    WHEN br.urgency = 'critical' THEN 1
-                    WHEN br.urgency = 'urgent' THEN 2
+                    WHEN br.urgency = 'critical'
+                        THEN 1
+                    WHEN br.urgency = 'urgent'
+                        THEN 2
                     ELSE 3
                 END,
                 br.created_at DESC
-        """, (donor_id,))
+            """,
+            (donor_id,)
+        )
 
         requests = cursor.fetchall()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS count
             FROM donor_responses dr
+
             INNER JOIN blood_requests br
                 ON dr.request_id = br.id
+
             WHERE dr.donor_id = %s
               AND dr.response = 'pending'
               AND br.status IN ('pending', 'matched')
-        """, (donor_id,))
+            """,
+            (donor_id,)
+        )
 
-        notification_count = cursor.fetchone()["count"]
+        notification_count = cursor.fetchone()[
+            "count"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS count
             FROM donor_responses dr
+
             INNER JOIN blood_requests br
                 ON dr.request_id = br.id
+
             WHERE dr.donor_id = %s
               AND dr.response = 'pending'
               AND br.urgency = 'critical'
               AND br.status IN ('pending', 'matched')
-        """, (donor_id,))
+            """,
+            (donor_id,)
+        )
 
-        critical_count = cursor.fetchone()["count"]
+        critical_count = cursor.fetchone()[
+            "count"
+        ]
 
         return render_template(
             "donor_dashboard.html",
@@ -435,25 +702,33 @@ def donor_dashboard():
 
 
 # =========================================================
-# TOGGLE DONOR AVAILABILITY
+# DONOR AVAILABILITY
 # =========================================================
 
-@app.route("/toggle-availability", methods=["POST"])
+@app.route(
+    "/toggle-availability",
+    methods=["POST"]
+)
 @donor_required
 def toggle_availability():
 
     donor_id = session["user_id"]
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT is_available
             FROM users
             WHERE id = %s
-        """, (donor_id,))
+            """,
+            (donor_id,)
+        )
 
         donor = cursor.fetchone()
 
@@ -472,14 +747,17 @@ def toggle_availability():
             donor["is_available"]
         )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE users
             SET is_available = %s
             WHERE id = %s
-        """, (
-            new_status,
-            donor_id
-        ))
+            """,
+            (
+                new_status,
+                donor_id
+            )
+        )
 
         conn.commit()
 
@@ -508,7 +786,7 @@ def toggle_availability():
 
 
 # =========================================================
-# DONOR ACCEPT / DECLINE REQUEST
+# DONOR ACCEPT / DECLINE
 # =========================================================
 
 @app.route(
@@ -516,7 +794,10 @@ def toggle_availability():
     methods=["POST"]
 )
 @donor_required
-def respond_request(response_id, action):
+def respond_request(
+    response_id,
+    action
+):
 
     if action not in [
         "accepted",
@@ -535,16 +816,20 @@ def respond_request(response_id, action):
     donor_id = session["user_id"]
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 dr.id,
                 dr.request_id,
                 dr.response,
                 br.status
+
             FROM donor_responses dr
 
             INNER JOIN blood_requests br
@@ -552,10 +837,12 @@ def respond_request(response_id, action):
 
             WHERE dr.id = %s
               AND dr.donor_id = %s
-        """, (
-            response_id,
-            donor_id
-        ))
+            """,
+            (
+                response_id,
+                donor_id
+            )
+        )
 
         response = cursor.fetchone()
 
@@ -581,25 +868,31 @@ def respond_request(response_id, action):
                 url_for("donor_dashboard")
             )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE donor_responses
+
             SET
                 response = %s,
                 responded_at = NOW()
+
             WHERE id = %s
               AND donor_id = %s
-        """, (
-            action,
-            response_id,
-            donor_id
-        ))
+            """,
+            (
+                action,
+                response_id,
+                donor_id
+            )
+        )
 
         conn.commit()
 
         if action == "accepted":
 
             flash(
-                "You accepted the blood request. Waiting for hospital approval.",
+                "You accepted the blood request. "
+                "Waiting for hospital approval.",
                 "success"
             )
 
@@ -624,7 +917,10 @@ def respond_request(response_id, action):
 # FIND BLOOD
 # =========================================================
 
-@app.route("/find-blood", methods=["GET", "POST"])
+@app.route(
+    "/find-blood",
+    methods=["GET", "POST"]
+)
 def find_blood():
 
     donors = []
@@ -642,26 +938,35 @@ def find_blood():
         ).strip()
 
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(
+            dictionary=True
+        )
 
         try:
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     id,
                     name,
                     blood_group,
                     city,
                     phone
+
                 FROM users
+
                 WHERE role = 'donor'
                   AND blood_group = %s
                   AND city = %s
                   AND is_available = TRUE
-            """, (
-                blood_group,
-                city
-            ))
+
+                ORDER BY name
+                """,
+                (
+                    blood_group,
+                    city
+                )
+            )
 
             donors = cursor.fetchall()
 
@@ -680,25 +985,35 @@ def find_blood():
 # REQUEST BLOOD
 # =========================================================
 
-@app.route("/request-blood", methods=["GET", "POST"])
+@app.route(
+    "/request-blood",
+    methods=["GET", "POST"]
+)
 @login_required
 def request_blood():
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 id,
                 name,
                 city,
                 address
+
             FROM hospitals
+
             WHERE is_verified = TRUE
+
             ORDER BY name
-        """)
+            """
+        )
 
         hospitals = cursor.fetchall()
 
@@ -807,16 +1122,30 @@ def request_blood():
             )
 
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(
+            dictionary=True
+        )
 
         try:
 
-            cursor.execute("""
-                SELECT id
+            # -------------------------------------------------
+            # VERIFY SELECTED HOSPITAL
+            # -------------------------------------------------
+
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    is_verified
+
                 FROM hospitals
+
                 WHERE id = %s
                   AND is_verified = TRUE
-            """, (hospital_id,))
+                """,
+                (hospital_id,)
+            )
 
             hospital = cursor.fetchone()
 
@@ -831,7 +1160,12 @@ def request_blood():
                     url_for("request_blood")
                 )
 
-            cursor.execute("""
+            # -------------------------------------------------
+            # CREATE BLOOD REQUEST
+            # -------------------------------------------------
+
+            cursor.execute(
+                """
                 INSERT INTO blood_requests
                 (
                     requester_id,
@@ -843,6 +1177,7 @@ def request_blood():
                     contact_phone,
                     city
                 )
+
                 VALUES
                 (
                     %s,
@@ -854,54 +1189,74 @@ def request_blood():
                     %s,
                     %s
                 )
-            """, (
-                session["user_id"],
-                hospital_id,
-                blood_group,
-                units_required,
-                urgency,
-                patient_name,
-                contact_phone,
-                city
-            ))
+                """,
+                (
+                    session["user_id"],
+                    hospital_id,
+                    blood_group,
+                    units_required,
+                    urgency,
+                    patient_name,
+                    contact_phone,
+                    city
+                )
+            )
 
             request_id = cursor.lastrowid
 
-            cursor.execute("""
-                SELECT id
+            # -------------------------------------------------
+            # FIND MATCHING DONORS
+            # -------------------------------------------------
+
+            cursor.execute(
+                """
+                SELECT
+                    id
+
                 FROM users
+
                 WHERE role = 'donor'
                   AND blood_group = %s
                   AND city = %s
                   AND is_available = TRUE
-            """, (
-                blood_group,
-                city
-            ))
+                """,
+                (
+                    blood_group,
+                    city
+                )
+            )
 
             matching_donors = cursor.fetchall()
 
             notified_count = 0
 
+            # -------------------------------------------------
+            # CREATE DONOR RESPONSES
+            # -------------------------------------------------
+
             for donor in matching_donors:
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO donor_responses
                     (
                         request_id,
                         donor_id,
                         response
                     )
+
                     VALUES
                     (
                         %s,
                         %s,
                         'pending'
                     )
-                """, (
-                    request_id,
-                    donor["id"]
-                ))
+                    """,
+                    (
+                        request_id,
+                        donor["id"]
+                    )
+                )
 
                 notified_count += 1
 
@@ -935,7 +1290,9 @@ def request_blood():
 # REQUEST STATUS
 # =========================================================
 
-@app.route("/request-status/<int:request_id>")
+@app.route(
+    "/request-status/<int:request_id>"
+)
 def request_status(request_id):
 
     if "user_id" not in session:
@@ -944,76 +1301,95 @@ def request_status(request_id):
             url_for("login")
         )
 
-    db = get_db_connection()
-    cursor = db.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
-    cursor.execute("""
-        SELECT
-            br.*,
-            h.name AS hospital_name
-        FROM blood_requests br
-        LEFT JOIN hospitals h
-            ON br.hospital_id = h.id
-        WHERE br.id = %s
-    """, (request_id,))
+    try:
 
-    blood_request = cursor.fetchone()
+        cursor.execute(
+            """
+            SELECT
+                br.*,
+                h.name AS hospital_name,
+                h.is_verified AS hospital_verified
 
-    if not blood_request:
+            FROM blood_requests br
+
+            LEFT JOIN hospitals h
+                ON br.hospital_id = h.id
+
+            WHERE br.id = %s
+            """,
+            (request_id,)
+        )
+
+        blood_request = cursor.fetchone()
+
+        if not blood_request:
+
+            return (
+                "Blood request not found",
+                404
+            )
+
+        cursor.execute(
+            """
+            SELECT
+                COUNT(*) AS total,
+
+                SUM(
+                    CASE
+                        WHEN response = 'accepted'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS accepted,
+
+                SUM(
+                    CASE
+                        WHEN response = 'pending'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS pending,
+
+                SUM(
+                    CASE
+                        WHEN response = 'declined'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS declined
+
+            FROM donor_responses
+
+            WHERE request_id = %s
+            """,
+            (request_id,)
+        )
+
+        stats = cursor.fetchone()
+
+        total = stats["total"] or 0
+        accepted = stats["accepted"] or 0
+        pending = stats["pending"] or 0
+        declined = stats["declined"] or 0
+
+        return render_template(
+            "request_status.html",
+            blood_request=blood_request,
+            total=total,
+            accepted=accepted,
+            pending=pending,
+            declined=declined
+        )
+
+    finally:
 
         cursor.close()
-        db.close()
-
-        return "Blood request not found", 404
-
-    cursor.execute("""
-        SELECT
-            COUNT(*) AS total,
-            SUM(
-                CASE
-                    WHEN response = 'accepted'
-                    THEN 1
-                    ELSE 0
-                END
-            ) AS accepted,
-            SUM(
-                CASE
-                    WHEN response = 'pending'
-                    THEN 1
-                    ELSE 0
-                END
-            ) AS pending,
-            SUM(
-                CASE
-                    WHEN response = 'declined'
-                    THEN 1
-                    ELSE 0
-                END
-            ) AS declined
-
-        FROM donor_responses
-
-        WHERE request_id = %s
-    """, (request_id,))
-
-    stats = cursor.fetchone()
-
-    cursor.close()
-    db.close()
-
-    total = stats["total"] or 0
-    accepted = stats["accepted"] or 0
-    pending = stats["pending"] or 0
-    declined = stats["declined"] or 0
-
-    return render_template(
-        "request_status.html",
-        blood_request=blood_request,
-        total=total,
-        accepted=accepted,
-        pending=pending,
-        declined=declined
-    )
+        conn.close()
 
 
 # =========================================================
@@ -1025,22 +1401,32 @@ def request_status(request_id):
 def my_requests():
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 br.*,
-                h.name AS hospital_name
+                h.name AS hospital_name,
+                h.is_verified AS hospital_verified
+
             FROM blood_requests br
+
             LEFT JOIN hospitals h
                 ON br.hospital_id = h.id
+
             WHERE br.requester_id = %s
+
             ORDER BY br.created_at DESC
-        """, (
-            session["user_id"],
-        ))
+            """,
+            (
+                session["user_id"],
+            )
+        )
 
         requests = cursor.fetchall()
 
@@ -1059,7 +1445,10 @@ def my_requests():
 # HOSPITAL REGISTRATION
 # =========================================================
 
-@app.route("/hospital-register", methods=["GET", "POST"])
+@app.route(
+    "/hospital-register",
+    methods=["GET", "POST"]
+)
 def hospital_register():
 
     if request.method == "POST":
@@ -1117,11 +1506,14 @@ def hospital_register():
 
         try:
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT id
                 FROM hospitals
                 WHERE email = %s
-            """, (email,))
+                """,
+                (email,)
+            )
 
             existing = cursor.fetchone()
 
@@ -1140,7 +1532,8 @@ def hospital_register():
                 password
             )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO hospitals
                 (
                     name,
@@ -1151,6 +1544,7 @@ def hospital_register():
                     city,
                     is_verified
                 )
+
                 VALUES
                 (
                     %s,
@@ -1161,19 +1555,22 @@ def hospital_register():
                     %s,
                     FALSE
                 )
-            """, (
-                name,
-                email,
-                hashed_password,
-                phone,
-                address,
-                city
-            ))
+                """,
+                (
+                    name,
+                    email,
+                    hashed_password,
+                    phone,
+                    address,
+                    city
+                )
+            )
 
             conn.commit()
 
             flash(
-                "Hospital registered. Wait for admin verification.",
+                "Hospital registered. "
+                "Wait for admin verification.",
                 "success"
             )
 
@@ -1195,7 +1592,10 @@ def hospital_register():
 # HOSPITAL LOGIN
 # =========================================================
 
-@app.route("/hospital-login", methods=["GET", "POST"])
+@app.route(
+    "/hospital-login",
+    methods=["GET", "POST"]
+)
 def hospital_login():
 
     if request.method == "POST":
@@ -1211,31 +1611,50 @@ def hospital_login():
         )
 
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(
+            dictionary=True
+        )
 
         try:
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT *
                 FROM hospitals
                 WHERE email = %s
-            """, (email,))
+                """,
+                (email,)
+            )
 
             hospital = cursor.fetchone()
 
-            if hospital and hospital["password"]:
+            if hospital:
 
-                if check_password_hash(
-                    hospital["password"],
-                    password
-                ):
+                stored_password = hospital.get(
+                    "password"
+                )
 
-                    session["hospital_id"] = hospital["id"]
-                    session["hospital_name"] = hospital["name"]
+                if stored_password:
 
-                    return redirect(
-                        url_for("hospital_dashboard")
-                    )
+                    try:
+
+                        valid = check_password_hash(
+                            stored_password,
+                            password
+                        )
+
+                    except Exception:
+
+                        valid = False
+
+                    if valid:
+
+                        session["hospital_id"] = hospital["id"]
+                        session["hospital_name"] = hospital["name"]
+
+                        return redirect(
+                            url_for("hospital_dashboard")
+                        )
 
             flash(
                 "Invalid hospital email or password.",
@@ -1263,7 +1682,9 @@ def hospital_dashboard():
     hospital_id = session["hospital_id"]
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
@@ -1271,18 +1692,28 @@ def hospital_dashboard():
         # HOSPITAL DETAILS
         # -------------------------------------------------
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT *
             FROM hospitals
             WHERE id = %s
-        """, (hospital_id,))
+            """,
+            (hospital_id,)
+        )
 
         hospital = cursor.fetchone()
 
         if not hospital:
 
-            session.pop("hospital_id", None)
-            session.pop("hospital_name", None)
+            session.pop(
+                "hospital_id",
+                None
+            )
+
+            session.pop(
+                "hospital_name",
+                None
+            )
 
             flash(
                 "Hospital account not found.",
@@ -1294,10 +1725,11 @@ def hospital_dashboard():
             )
 
         # -------------------------------------------------
-        # REQUESTS + ACCEPTED DONOR DETAILS
+        # REQUESTS + DONOR
         # -------------------------------------------------
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 br.*,
 
@@ -1305,37 +1737,57 @@ def hospital_dashboard():
 
                 h.name AS hospital_name,
 
+                h.is_verified AS hospital_verified,
+
                 (
                     SELECT d.name
+
                     FROM donor_responses dr
+
                     INNER JOIN users d
                         ON dr.donor_id = d.id
+
                     WHERE dr.request_id = br.id
                       AND dr.response = 'accepted'
+
                     ORDER BY dr.responded_at ASC
+
                     LIMIT 1
+
                 ) AS donor_name,
 
                 (
                     SELECT d.phone
+
                     FROM donor_responses dr
+
                     INNER JOIN users d
                         ON dr.donor_id = d.id
+
                     WHERE dr.request_id = br.id
                       AND dr.response = 'accepted'
+
                     ORDER BY dr.responded_at ASC
+
                     LIMIT 1
+
                 ) AS donor_phone,
 
                 (
                     SELECT d.blood_group
+
                     FROM donor_responses dr
+
                     INNER JOIN users d
                         ON dr.donor_id = d.id
+
                     WHERE dr.request_id = br.id
                       AND dr.response = 'accepted'
+
                     ORDER BY dr.responded_at ASC
+
                     LIMIT 1
+
                 ) AS donor_blood_group
 
             FROM blood_requests br
@@ -1349,7 +1801,9 @@ def hospital_dashboard():
             WHERE br.hospital_id = %s
 
             ORDER BY br.created_at DESC
-        """, (hospital_id,))
+            """,
+            (hospital_id,)
+        )
 
         requests = cursor.fetchall()
 
@@ -1357,49 +1811,84 @@ def hospital_dashboard():
         # STATISTICS
         # -------------------------------------------------
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE hospital_id = %s
-        """, (hospital_id,))
+            """,
+            (hospital_id,)
+        )
 
-        total_requests = cursor.fetchone()["total"]
+        total_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE hospital_id = %s
               AND status = 'pending'
-        """, (hospital_id,))
+            """,
+            (hospital_id,)
+        )
 
-        pending_requests = cursor.fetchone()["total"]
+        pending_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE hospital_id = %s
               AND status = 'matched'
-        """, (hospital_id,))
+            """,
+            (hospital_id,)
+        )
 
-        matched_requests = cursor.fetchone()["total"]
+        matched_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE hospital_id = %s
               AND status = 'fulfilled'
-        """, (hospital_id,))
+            """,
+            (hospital_id,)
+        )
 
-        fulfilled_requests = cursor.fetchone()["total"]
+        fulfilled_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE hospital_id = %s
               AND status = 'cancelled'
-        """, (hospital_id,))
+            """,
+            (hospital_id,)
+        )
 
-        cancelled_requests = cursor.fetchone()["total"]
+        cancelled_requests = cursor.fetchone()[
+            "total"
+        ]
 
         return render_template(
             "hospital_dashboard.html",
@@ -1427,26 +1916,35 @@ def hospital_dashboard():
     methods=["POST"]
 )
 @hospital_required
-def hospital_approve_request(request_id):
+def hospital_approve_request(
+    request_id
+):
 
     hospital_id = session["hospital_id"]
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 id,
                 status
+
             FROM blood_requests
+
             WHERE id = %s
               AND hospital_id = %s
-        """, (
-            request_id,
-            hospital_id
-        ))
+            """,
+            (
+                request_id,
+                hospital_id
+            )
+        )
 
         blood_request = cursor.fetchone()
 
@@ -1472,12 +1970,17 @@ def hospital_approve_request(request_id):
                 url_for("hospital_dashboard")
             )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS accepted_count
+
             FROM donor_responses
+
             WHERE request_id = %s
               AND response = 'accepted'
-        """, (request_id,))
+            """,
+            (request_id,)
+        )
 
         accepted_count = cursor.fetchone()[
             "accepted_count"
@@ -1494,16 +1997,21 @@ def hospital_approve_request(request_id):
                 url_for("hospital_dashboard")
             )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE blood_requests
+
             SET status = 'matched'
+
             WHERE id = %s
               AND hospital_id = %s
               AND status = 'pending'
-        """, (
-            request_id,
-            hospital_id
-        ))
+            """,
+            (
+                request_id,
+                hospital_id
+            )
+        )
 
         conn.commit()
 
@@ -1531,7 +2039,9 @@ def hospital_approve_request(request_id):
     methods=["POST"]
 )
 @hospital_required
-def hospital_reject_request(request_id):
+def hospital_reject_request(
+    request_id
+):
 
     hospital_id = session["hospital_id"]
 
@@ -1540,16 +2050,21 @@ def hospital_reject_request(request_id):
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE blood_requests
+
             SET status = 'cancelled'
+
             WHERE id = %s
               AND hospital_id = %s
               AND status IN ('pending', 'matched')
-        """, (
-            request_id,
-            hospital_id
-        ))
+            """,
+            (
+                request_id,
+                hospital_id
+            )
+        )
 
         conn.commit()
 
@@ -1569,7 +2084,7 @@ def hospital_reject_request(request_id):
 
 
 # =========================================================
-# HOSPITAL MARK FULFILLED
+# HOSPITAL FULFILL
 # =========================================================
 
 @app.route(
@@ -1577,7 +2092,9 @@ def hospital_reject_request(request_id):
     methods=["POST"]
 )
 @hospital_required
-def hospital_fulfill_request(request_id):
+def hospital_fulfill_request(
+    request_id
+):
 
     hospital_id = session["hospital_id"]
 
@@ -1586,16 +2103,21 @@ def hospital_fulfill_request(request_id):
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE blood_requests
+
             SET status = 'fulfilled'
+
             WHERE id = %s
               AND hospital_id = %s
               AND status = 'matched'
-        """, (
-            request_id,
-            hospital_id
-        ))
+            """,
+            (
+                request_id,
+                hospital_id
+            )
+        )
 
         conn.commit()
 
@@ -1621,8 +2143,15 @@ def hospital_fulfill_request(request_id):
 @app.route("/hospital-logout")
 def hospital_logout():
 
-    session.pop("hospital_id", None)
-    session.pop("hospital_name", None)
+    session.pop(
+        "hospital_id",
+        None
+    )
+
+    session.pop(
+        "hospital_name",
+        None
+    )
 
     flash(
         "Hospital logged out successfully.",
@@ -1657,7 +2186,10 @@ def logout():
 # ADMIN LOGIN
 # =========================================================
 
-@app.route("/admin-login", methods=["GET", "POST"])
+@app.route(
+    "/admin-login",
+    methods=["GET", "POST"]
+)
 def admin_login():
 
     if request.method == "POST":
@@ -1672,43 +2204,84 @@ def admin_login():
             ""
         )
 
+        if not email or not password:
+
+            flash(
+                "Please enter admin email and password.",
+                "error"
+            )
+
+            return render_template(
+                "admin_login.html"
+            )
+
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(
+            dictionary=True
+        )
 
         try:
 
-            cursor.execute("""
-                SELECT *
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    email,
+                    password,
+                    role
+
                 FROM users
+
                 WHERE email = %s
                   AND role = 'admin'
-            """, (email,))
+
+                LIMIT 1
+                """,
+                (email,)
+            )
 
             admin = cursor.fetchone()
-
-            if admin and check_password_hash(
-                admin["password"],
-                password
-            ):
-
-                session["user_id"] = admin["id"]
-                session["name"] = admin["name"]
-                session["role"] = "admin"
-                session["email"] = admin["email"]
-
-                return redirect(
-                    url_for("admin_dashboard")
-                )
-
-            flash(
-                "Invalid admin email or password.",
-                "error"
-            )
 
         finally:
 
             cursor.close()
             conn.close()
+
+        if admin:
+
+            try:
+
+                password_valid = check_password_hash(
+                    admin["password"],
+                    password
+                )
+
+            except Exception as e:
+
+                print(
+                    "Admin password verification error:",
+                    e
+                )
+
+                password_valid = False
+
+            if password_valid:
+
+                session["user_id"] = admin["id"]
+                session["user_name"] = admin["name"]
+                session["name"] = admin["name"]
+                session["email"] = admin["email"]
+                session["role"] = "admin"
+
+                return redirect(
+                    url_for("admin_dashboard")
+                )
+
+        flash(
+            "Invalid admin email or password.",
+            "error"
+        )
 
     return render_template(
         "admin_login.html"
@@ -1724,18 +2297,25 @@ def admin_login():
     methods=["POST"]
 )
 @admin_required
-def admin_verify_hospital(hospital_id):
+def admin_verify_hospital(
+    hospital_id
+):
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
 
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE hospitals
+
             SET is_verified = TRUE
+
             WHERE id = %s
-        """, (hospital_id,))
+            """,
+            (hospital_id,)
+        )
 
         conn.commit()
 
@@ -1763,40 +2343,81 @@ def admin_verify_hospital(hospital_id):
 def admin_dashboard():
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # USERS
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
             FROM users
-        """)
+            """
+        )
 
-        total_users = cursor.fetchone()["total"]
+        total_users = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # DONORS
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM users
+
             WHERE role = 'donor'
-        """)
+            """
+        )
 
-        total_donors = cursor.fetchone()["total"]
+        total_donors = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # HOSPITALS
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
             FROM hospitals
-        """)
+            """
+        )
 
-        total_hospitals = cursor.fetchone()["total"]
+        total_hospitals = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # REQUESTS
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
             FROM blood_requests
-        """)
+            """
+        )
 
-        total_requests = cursor.fetchone()["total"]
+        total_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # HOSPITAL LIST
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT
                 id,
                 name,
@@ -1806,13 +2427,21 @@ def admin_dashboard():
                 city,
                 is_verified,
                 created_at
+
             FROM hospitals
+
             ORDER BY created_at DESC
-        """)
+            """
+        )
 
         hospitals = cursor.fetchall()
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # DONOR LIST
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT
                 id,
                 name,
@@ -1822,14 +2451,23 @@ def admin_dashboard():
                 city,
                 is_available,
                 created_at
+
             FROM users
+
             WHERE role = 'donor'
+
             ORDER BY created_at DESC
-        """)
+            """
+        )
 
         donors = cursor.fetchall()
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # BLOOD REQUEST LIST
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT
                 br.id,
                 br.patient_name,
@@ -1843,7 +2481,9 @@ def admin_dashboard():
 
                 u.name AS requester_name,
 
-                h.name AS hospital_name
+                h.name AS hospital_name,
+
+                h.is_verified AS hospital_verified
 
             FROM blood_requests br
 
@@ -1854,57 +2494,102 @@ def admin_dashboard():
                 ON br.hospital_id = h.id
 
             ORDER BY br.created_at DESC
-        """)
+            """
+        )
 
         blood_requests = cursor.fetchall()
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # REQUEST STATISTICS
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE status = 'pending'
-        """)
+            """
+        )
 
-        pending_requests = cursor.fetchone()["total"]
+        pending_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE status = 'matched'
-        """)
+            """
+        )
 
-        matched_requests = cursor.fetchone()["total"]
+        matched_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE status = 'fulfilled'
-        """)
+            """
+        )
 
-        fulfilled_requests = cursor.fetchone()["total"]
+        fulfilled_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM blood_requests
+
             WHERE status = 'cancelled'
-        """)
+            """
+        )
 
-        cancelled_requests = cursor.fetchone()["total"]
+        cancelled_requests = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # HOSPITAL VERIFICATION STATISTICS
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
+
             FROM hospitals
+
             WHERE is_verified = TRUE
-        """)
+            """
+        )
 
-        verified_hospitals = cursor.fetchone()["total"]
+        verified_hospitals = cursor.fetchone()[
+            "total"
+        ]
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) AS total
-            FROM hospitals
-            WHERE is_verified = FALSE
-        """)
 
-        pending_hospitals = cursor.fetchone()["total"]
+            FROM hospitals
+
+            WHERE is_verified = FALSE
+            """
+        )
+
+        pending_hospitals = cursor.fetchone()[
+            "total"
+        ]
 
         return render_template(
             "admin_dashboard.html",
@@ -1941,14 +2626,23 @@ def admin_dashboard():
     "/admin/request/<int:request_id>"
 )
 @admin_required
-def admin_request_details(request_id):
+def admin_request_details(
+    request_id
+):
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(
+        dictionary=True
+    )
 
     try:
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # REQUEST DETAILS
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT
                 br.*,
 
@@ -1960,7 +2654,16 @@ def admin_request_details(request_id):
                 h.email AS hospital_email,
                 h.phone AS hospital_phone,
                 h.address AS hospital_address,
-                h.city AS hospital_city
+                h.city AS hospital_city,
+
+                /*
+                 IMPORTANT:
+                 Both aliases are included so existing
+                 templates can use either variable.
+                */
+
+                h.is_verified AS hospital_verified,
+                h.is_verified AS is_verified
 
             FROM blood_requests br
 
@@ -1971,7 +2674,9 @@ def admin_request_details(request_id):
                 ON br.hospital_id = h.id
 
             WHERE br.id = %s
-        """, (request_id,))
+            """,
+            (request_id,)
+        )
 
         blood_request = cursor.fetchone()
 
@@ -1986,7 +2691,12 @@ def admin_request_details(request_id):
                 url_for("admin_dashboard")
             )
 
-        cursor.execute("""
+        # -------------------------------------------------
+        # DONOR RESPONSES
+        # -------------------------------------------------
+
+        cursor.execute(
+            """
             SELECT
                 dr.id,
                 dr.response,
@@ -2008,19 +2718,29 @@ def admin_request_details(request_id):
             WHERE dr.request_id = %s
 
             ORDER BY
+
                 CASE
-                    WHEN dr.response = 'accepted' THEN 1
-                    WHEN dr.response = 'pending' THEN 2
+                    WHEN dr.response = 'accepted'
+                        THEN 1
+
+                    WHEN dr.response = 'pending'
+                        THEN 2
+
                     ELSE 3
                 END,
+
                 dr.created_at DESC
-        """, (request_id,))
+            """,
+            (request_id,)
+        )
 
         donor_responses = cursor.fetchall()
 
         return render_template(
             "admin_request_details.html",
+
             blood_request=blood_request,
+
             donor_responses=donor_responses
         )
 
@@ -2054,4 +2774,7 @@ def admin_logout():
 # =========================================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        debug=True
+    )
