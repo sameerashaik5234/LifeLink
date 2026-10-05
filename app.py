@@ -27,7 +27,6 @@ from functools import wraps
 
 load_dotenv()
 
-
 app = Flask(__name__)
 
 app.secret_key = os.getenv(
@@ -2626,9 +2625,7 @@ def admin_dashboard():
     "/admin/request/<int:request_id>"
 )
 @admin_required
-def admin_request_details(
-    request_id
-):
+def admin_request_details(request_id):
 
     conn = get_db_connection()
     cursor = conn.cursor(
@@ -2638,7 +2635,7 @@ def admin_request_details(
     try:
 
         # -------------------------------------------------
-        # REQUEST DETAILS
+        # GET BLOOD REQUEST DETAILS
         # -------------------------------------------------
 
         cursor.execute(
@@ -2655,15 +2652,7 @@ def admin_request_details(
                 h.phone AS hospital_phone,
                 h.address AS hospital_address,
                 h.city AS hospital_city,
-
-                /*
-                 IMPORTANT:
-                 Both aliases are included so existing
-                 templates can use either variable.
-                */
-
-                h.is_verified AS hospital_verified,
-                h.is_verified AS is_verified
+                h.is_verified AS hospital_verified
 
             FROM blood_requests br
 
@@ -2692,13 +2681,14 @@ def admin_request_details(
             )
 
         # -------------------------------------------------
-        # DONOR RESPONSES
+        # GET DONOR RESPONSES
         # -------------------------------------------------
 
         cursor.execute(
             """
             SELECT
-                dr.id,
+                dr.id AS response_id,
+                dr.donor_id,
                 dr.response,
                 dr.responded_at,
                 dr.created_at,
@@ -2706,9 +2696,9 @@ def admin_request_details(
                 u.name AS donor_name,
                 u.email AS donor_email,
                 u.phone AS donor_phone,
-                u.blood_group,
-                u.city,
-                u.is_available
+                u.blood_group AS donor_blood_group,
+                u.city AS donor_city,
+                u.is_available AS donor_available
 
             FROM donor_responses dr
 
@@ -2718,15 +2708,14 @@ def admin_request_details(
             WHERE dr.request_id = %s
 
             ORDER BY
-
                 CASE
                     WHEN dr.response = 'accepted'
                         THEN 1
-
                     WHEN dr.response = 'pending'
                         THEN 2
-
-                    ELSE 3
+                    WHEN dr.response = 'declined'
+                        THEN 3
+                    ELSE 4
                 END,
 
                 dr.created_at DESC
@@ -2736,12 +2725,58 @@ def admin_request_details(
 
         donor_responses = cursor.fetchall()
 
+        # -------------------------------------------------
+        # DONOR STATISTICS
+        # -------------------------------------------------
+
+        total_donors_notified = len(
+            donor_responses
+        )
+
+        accepted_donors = sum(
+            1
+            for donor in donor_responses
+            if donor["response"] == "accepted"
+        )
+
+        pending_donors = sum(
+            1
+            for donor in donor_responses
+            if donor["response"] == "pending"
+        )
+
+        declined_donors = sum(
+            1
+            for donor in donor_responses
+            if donor["response"] == "declined"
+        )
+
+        # -------------------------------------------------
+        # RENDER ADMIN REQUEST DETAILS
+        # -------------------------------------------------
+
         return render_template(
             "admin_request_details.html",
 
             blood_request=blood_request,
 
-            donor_responses=donor_responses
+            donor_responses=donor_responses,
+
+            total_donors_notified=(
+                total_donors_notified
+            ),
+
+            accepted_donors=(
+                accepted_donors
+            ),
+
+            pending_donors=(
+                pending_donors
+            ),
+
+            declined_donors=(
+                declined_donors
+            )
         )
 
     finally:
@@ -2751,30 +2786,8 @@ def admin_request_details(
 
 
 # =========================================================
-# ADMIN LOGOUT
-# =========================================================
-
-@app.route("/admin-logout")
-def admin_logout():
-
-    session.clear()
-
-    flash(
-        "Admin logged out successfully.",
-        "success"
-    )
-
-    return redirect(
-        url_for("admin_login")
-    )
-
-
-# =========================================================
 # RUN APPLICATION
 # =========================================================
 
 if __name__ == "__main__":
-
-    app.run(
-        debug=True
-    )
+    app.run(debug=True)
